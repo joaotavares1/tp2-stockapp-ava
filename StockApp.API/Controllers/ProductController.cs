@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using StockApp.Application.DTOs;
 using StockApp.Application.Interfaces;
 using StockApp.Application.Services;
@@ -55,6 +56,35 @@ namespace HelpStockApp.API.Controllers
 
             // Retorna o código 201 (Created) e a URL do novo recurso
             return CreatedAtAction(nameof(Get), new { id = productDto.Id }, productDto);
+        }
+
+        [HttpGet("low-stock")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [Produces("application/json")]
+        public async Task<ActionResult<IEnumerable<Product>>> GetLowStock([FromQuery] int threshold)
+        {
+            if (threshold <= 0)
+            {
+                return BadRequest("The threshold must be greater than zero.");
+            }
+
+                var products = await _productService.GetLowStockAsync(threshold);
+
+                if (!products.Any())
+                {
+                    return Ok(new { message = "No products with low stock found.", count = 0 });
+                }
+
+                return Ok(new
+                {
+                    message = "Low stock products retrieved successfully.",
+                    count = products.Count(),
+                    data = products
+                });
+            
+            
         }
 
     }

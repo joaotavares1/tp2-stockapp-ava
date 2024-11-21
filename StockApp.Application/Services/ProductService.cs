@@ -51,5 +51,15 @@ namespace StockApp.Application.Services
             var productEntity = _mapper.Map<Product>(productDto);
             await _productRepository.Update(productEntity);
         }
+
+        public async Task<IEnumerable<Product>> GetLowStockAsync(int threshold)
+        {
+            if (threshold <= 0)
+            {
+                throw new ArgumentException("Threshold must be greater than zero.", nameof(threshold));
+            }
+
+            return (IEnumerable<Product>)await _productRepository.GetLowStockAsync(threshold);
+        }
     }
 }
