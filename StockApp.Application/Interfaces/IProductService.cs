@@ -1,4 +1,5 @@
 ﻿using StockApp.Application.DTOs;
+using StockApp.Domain.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,6 +14,8 @@ namespace StockApp.Application.Interfaces
         Task<ProductDTO> GetProductById(int? id);
         Task Add(ProductDTO productDto);
         Task Update(ProductDTO productDto);
-        Task Remove(int? id);
+        Task Remove(int? id);   
+        Task<IEnumerable<Product>> GetLowStockAsync(int threshold);
+
     }
 }
