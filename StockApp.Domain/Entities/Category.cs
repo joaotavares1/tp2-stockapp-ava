@@ -10,6 +10,7 @@ namespace StockApp.Domain.Entities
         #endregion
 
         #region Construtores
+        public Category() { }
         public Category(string name)
         {
             ValidateDomain(name);

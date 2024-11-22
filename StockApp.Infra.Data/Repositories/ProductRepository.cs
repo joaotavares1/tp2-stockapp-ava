@@ -15,6 +15,7 @@ namespace StockApp.Infra.Data.Repositories
 
         public async Task<Product> Create(Product product)
         {
+            
             _productContext.Add(product);
             await _productContext.SaveChangesAsync();
             return product;
@@ -48,6 +49,12 @@ namespace StockApp.Infra.Data.Repositories
             return await _productContext.Products
                 .Where(p => p.Stock <= threshold)
                 .ToListAsync();
+        }
+
+        public async Task BulkUpdateAsync(List<Product> products)
+        {
+            _productContext.Products.UpdateRange(products);
+            await _productContext.SaveChangesAsync();
         }
     }
 }

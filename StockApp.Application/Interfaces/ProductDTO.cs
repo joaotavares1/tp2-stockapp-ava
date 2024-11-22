@@ -24,7 +24,7 @@ namespace StockApp.Application.DTOs
         [MinLength(5)]
         [MaxLength(200)]
         [DisplayName("Description")]
-        public string Description { get; set; }
+        public string? Description { get; set; }
 
         [Required(ErrorMessage = "The Price is Required")]
         [Column(TypeName = "decimal(18,2)")]
@@ -41,7 +41,7 @@ namespace StockApp.Application.DTOs
         [DisplayName("Product Image")]
         public string Image { get; set; }
 
-        public Category Category { get; set; }
+        public CategoryDTO Category { get; set; }
 
         [DisplayName("Categories")]
         public int CategoryId { get; set; }
