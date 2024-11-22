@@ -22,10 +22,11 @@ namespace StockApp.Application.Services
             _mapper = mapper;
         }
 
-        public async Task Add(ProductDTO productDto)
+        public async Task<Product> Add(ProductDTO productDto)
         {
             var productEntity = _mapper.Map<Product>(productDto);
             await _productRepository.Create(productEntity);
+            return productEntity;
         }
 
         public async Task<IEnumerable<ProductDTO>> GetProducts()
@@ -60,6 +61,11 @@ namespace StockApp.Application.Services
             }
 
             return (IEnumerable<Product>)await _productRepository.GetLowStockAsync(threshold);
+        }
+
+        public async Task BulkUpdateAsync(List<Product> products)
+        {
+             await _productRepository.BulkUpdateAsync(products);
         }
     }
 }
