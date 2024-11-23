@@ -56,5 +56,12 @@ namespace StockApp.Infra.Data.Repositories
             _productContext.Products.UpdateRange(products);
             await _productContext.SaveChangesAsync();
         }
+
+        public async Task<IEnumerable<Product>> GetProductByIds(List<int> productIds)
+        {
+            return await _productContext.Products
+                .Where(p => productIds.Contains(p.Id))
+                .ToListAsync();
+        }
     }
 }

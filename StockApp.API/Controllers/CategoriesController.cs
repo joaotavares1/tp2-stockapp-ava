@@ -15,7 +15,7 @@ namespace StockApp.API.Controllers
             _categoryService = categoryService;
         }
 
-        [HttpGet(Name ="GetCategories")]
+        [HttpGet("GetCategories")]
         public async Task<ActionResult<IEnumerable<CategoryDTO>>> Get() 
         {
             var categories = await _categoryService.GetCategories();
@@ -25,7 +25,7 @@ namespace StockApp.API.Controllers
             }
             return Ok(categories);
         }
-        [HttpGet("{id:int}", Name = "GetCategory")]
+        [HttpGet("GetCategoryById")]
         public async Task<ActionResult<CategoryDTO>> Get(int id)
         {
             var category = await _categoryService.GetCategoryById(id);
@@ -35,7 +35,7 @@ namespace StockApp.API.Controllers
             }
             return Ok(category);
         }
-        [HttpPost(Name ="Create Category")]
+        [HttpPost("Create Category")]
         public async Task<ActionResult> Post([FromBody] CategoryDTO categoryDTO)
         {
             if(categoryDTO == null)
@@ -48,7 +48,7 @@ namespace StockApp.API.Controllers
                 new { id = categoryDTO.Id }, categoryDTO);
         }
 
-        [HttpPut(Name ="Update Category")]
+        [HttpPut("Update Category")]
         public async Task<ActionResult> Put(int id, [FromBody] CategoryDTO categoryDTO)
         {
             if(id != categoryDTO.Id)
@@ -65,7 +65,7 @@ namespace StockApp.API.Controllers
             return Ok(categoryDTO);
         }
 
-        [HttpDelete("{id:int}", Name ="Delete Category")]
+        [HttpDelete("Delete Category")]
         public async Task<ActionResult<CategoryDTO>> Detele(int id)
         {
             var category = await _categoryService.GetCategoryById(id);

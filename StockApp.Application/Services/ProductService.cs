@@ -72,12 +72,17 @@ namespace StockApp.Application.Services
                 throw new ArgumentException("Threshold must be greater than zero.", nameof(threshold));
             }
 
-            return (IEnumerable<Product>)await _productRepository.GetLowStockAsync(threshold);
+            return await _productRepository.GetLowStockAsync(threshold);
         }
 
         public async Task BulkUpdateAsync(List<Product> products)
         {
              await _productRepository.BulkUpdateAsync(products);
+        }
+
+        public async Task<IEnumerable<Product>> GetProductByIds(List<int> productIds)
+        {
+           return await _productRepository.GetProductByIds(productIds);
         }
     }
 }
