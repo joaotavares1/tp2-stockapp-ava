@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using StockApp.Domain.Entities;
 using StockApp.Infra.Data.Context;
 
 #nullable disable
@@ -94,6 +95,7 @@ namespace StockApp.Infra.Data.Migrations
 
                     b.ToTable("Products");
                 });
+                modelBuilder.Entity<Product>().ToTable("Products");
 
             modelBuilder.Entity("StockApp.Domain.Entities.Product", b =>
                 {
