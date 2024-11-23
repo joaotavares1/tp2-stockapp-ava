@@ -1,5 +1,5 @@
-using System.Text.Json.Serialization;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using StockApp.Infra.IoC;
 
 internal class Program
@@ -9,7 +9,7 @@ internal class Program
 
         var builder = WebApplication.CreateBuilder(args);
 
-        
+
         // Add services to the container.
         builder.Services.AddInfrastructureAPI(builder.Configuration);
 
@@ -17,6 +17,8 @@ internal class Program
 
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
+        builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+
 
 
         var app = builder.Build();

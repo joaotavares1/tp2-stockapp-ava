@@ -15,11 +15,13 @@ namespace StockApp.Application.Services
     {
         private IProductRepository _productRepository;
         private IMapper _mapper;
+        private IAuditService _auditService;
 
-        public ProductService(IProductRepository productRepository, IMapper mapper)
+        public ProductService(IProductRepository productRepository, IMapper mapper, IAuditService auditService)
         {
             _productRepository = productRepository;
             _mapper = mapper;
+            _auditService = auditService;
         }
 
         public async Task<Product> Add(ProductDTO productDto)
@@ -37,7 +39,7 @@ namespace StockApp.Application.Services
 
         public async Task<ProductDTO> GetProductById(int? id)
         {
-            var productEntity = _productRepository.GetById(id);
+            var productEntity = await _productRepository.GetById(id);
             return _mapper.Map<ProductDTO>(productEntity);
         }
 
@@ -49,8 +51,18 @@ namespace StockApp.Application.Services
 
         public async Task Update(ProductDTO productDto)
         {
-            var productEntity = _mapper.Map<Product>(productDto);
-            await _productRepository.Update(productEntity);
+            var existingProduct = await _productRepository.GetById(productDto.Id);
+            if (existingProduct == null) throw new InvalidOperationException("Product not found.");
+
+            if (existingProduct.Stock != productDto.Stock)
+            {
+                await _auditService.AuditStockChange(existingProduct.Id, existingProduct.Stock, productDto.Stock);
+            }
+
+            // Atualize as propriedades manualmente
+            _mapper.Map(productDto, existingProduct);
+
+            await _productRepository.Update(existingProduct);
         }
 
         public async Task<IEnumerable<Product>> GetLowStockAsync(int threshold)

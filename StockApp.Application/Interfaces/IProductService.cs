@@ -8,7 +8,7 @@ namespace StockApp.Application.Interfaces
         Task<IEnumerable<ProductDTO>> GetProducts();
         Task<ProductDTO> GetProductById(int? id);
         Task<Product> Add(ProductDTO productDto);
-        Task Update(ProductDTO product);
+        Task Update(ProductDTO productDto);
         Task Remove(int? id);
         Task<IEnumerable<Product>> GetLowStockAsync(int threshold);
         Task BulkUpdateAsync(List<Product> products);

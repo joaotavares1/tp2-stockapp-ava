@@ -3,6 +3,7 @@ using StockApp.Application.DTOs;
 using StockApp.Application.Interfaces;
 using StockApp.Application.Services;
 using StockApp.Domain.Entities;
+using AutoMapper;
 
 namespace HelpStockApp.API.Controllers
 {
@@ -11,14 +12,18 @@ namespace HelpStockApp.API.Controllers
     public class ProductController : ControllerBase
     {
         private readonly IProductService _productService;
+        private readonly IAuditService _auditService;
+        private readonly IMapper _mapper;
 
-        public ProductController(IProductService productService)
+        public ProductController(IProductService productService, IAuditService auditService, IMapper mapper)
         {
             _productService = productService;
+            _auditService = auditService;
+            _mapper = mapper;
         }
 
         // Endpoint para listar todos os produtos
-        [HttpGet(Name = "GetProducts")]
+        [HttpGet("GetProducts")]
         public async Task<ActionResult<IEnumerable<ProductDTO>>> Get()
         {
             var products = await _productService.GetProducts();
@@ -30,7 +35,7 @@ namespace HelpStockApp.API.Controllers
         }
 
         // Endpoint para buscar um produto por ID
-        [HttpGet("{id:int}", Name = "GetProduct")]  // Corrigido a rota
+        [HttpGet("GetProductById")]  // Corrigido a rota
         public async Task<ActionResult<ProductDTO>> Get(int id)
         {
             var product = await _productService.GetProductById(id);
@@ -42,7 +47,7 @@ namespace HelpStockApp.API.Controllers
         }
 
         // Endpoint para criar um novo produto
-        [HttpPost]
+        [HttpPost("Create")]
         public async Task<ActionResult> CreateProduct([FromBody] ProductDTO productDto)
         {
             if (!ModelState.IsValid)
@@ -50,6 +55,26 @@ namespace HelpStockApp.API.Controllers
 
             var product = await _productService.Add(productDto);
             return CreatedAtAction(nameof(Get), new { id = product.Id }, productDto);
+        }
+
+        [HttpPut("Update")]
+        public async Task<ActionResult> UpdateProduct(int id, [FromBody] ProductDTO productDto)
+        {
+            if (id != productDto.Id)
+            {
+                return BadRequest("Product ID mismatch.");
+            }
+
+            // Antes de atualizar o produto, vamos capturar as mudanças de estoque para auditoria
+            var existingProduct = await _productService.GetProductById(id);
+            if (existingProduct != null && existingProduct.Stock != productDto.Stock)
+            {
+                // Registrar a auditoria da mudança no estoque
+                await _auditService.AuditStockChange(id, existingProduct.Stock, productDto.Stock);
+            }
+
+            await _productService.Update(productDto);
+            return Ok(); // Produto atualizado com sucesso
         }
 
         [HttpGet("low-stock")]
@@ -80,9 +105,25 @@ namespace HelpStockApp.API.Controllers
         [HttpPut("bulk-update")]
         public async Task<IActionResult> BulkUpdate([FromBody] List<Product> products)
         {
-            await _productService.BulkUpdateAsync(products);
+            var productsToUpdate = new List<Product>();
+            foreach (var product in products)
+            {
+                var existingProduct = await _productService.GetProductById(product.Id);
+                if (existingProduct != null && existingProduct.Stock != product.Stock)
+                {
+                    // Registrar a auditoria da mudança no estoque
+                    await _auditService.AuditStockChange(existingProduct.Id, existingProduct.Stock, product.Stock);
+                }
+
+                var productEntity = _mapper.Map<Product>(product);
+                productsToUpdate.Add(productEntity);
+            }
+
+            await _productService.BulkUpdateAsync(productsToUpdate);
             return Ok();
         }
+
+      
 
     }
 }
