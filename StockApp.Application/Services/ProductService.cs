@@ -77,12 +77,13 @@ namespace StockApp.Application.Services
 
         public async Task BulkUpdateAsync(List<Product> products)
         {
-             await _productRepository.BulkUpdateAsync(products);
+            await _productRepository.BulkUpdateAsync(products);
         }
 
         public async Task<IEnumerable<Product>> GetProductByIds(List<int> productIds)
         {
-           return await _productRepository.GetProductByIds(productIds);
+            return await _productRepository.GetProductByIds(productIds);
         }
+        public IQueryable<Product> Products => _productRepository.Products.AsQueryable();
     }
-}
+    }

@@ -1,9 +1,10 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.Security.Cryptography.X509Certificates;
+using AutoMapper;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using StockApp.Application.DTOs;
 using StockApp.Application.Interfaces;
-using StockApp.Application.Services;
 using StockApp.Domain.Entities;
-using AutoMapper;
 
 namespace HelpStockApp.API.Controllers
 {
@@ -23,7 +24,7 @@ namespace HelpStockApp.API.Controllers
         }
 
         // Endpoint para listar todos os produtos
-        [HttpGet("GetProducts")]
+        [HttpGet("get-products")]
         public async Task<ActionResult<IEnumerable<ProductDTO>>> Get()
         {
             var products = await _productService.GetProducts();
@@ -35,7 +36,7 @@ namespace HelpStockApp.API.Controllers
         }
 
         // Endpoint para buscar um produto por ID
-        [HttpGet("GetProductById")]  // Corrigido a rota
+        [HttpGet("getProductById")]  // Corrigido a rota
         public async Task<ActionResult<ProductDTO>> Get(int id)
         {
             var product = await _productService.GetProductById(id);
@@ -47,7 +48,7 @@ namespace HelpStockApp.API.Controllers
         }
 
         // Endpoint para criar um novo produto
-        [HttpPost("Create Product")]
+        [HttpPost("create-product")]
         public async Task<ActionResult> CreateProduct([FromBody] ProductDTO productDto)
         {
             if (!ModelState.IsValid)
@@ -57,7 +58,7 @@ namespace HelpStockApp.API.Controllers
             return CreatedAtAction(nameof(Get), new { id = product.Id }, productDto);
         }
 
-        [HttpPut("Update Product")]
+        [HttpPut("update-product")]
         public async Task<ActionResult> UpdateProduct(int id, [FromBody] ProductDTO productDto)
         {
             if (id != productDto.Id)
@@ -77,7 +78,7 @@ namespace HelpStockApp.API.Controllers
             return Ok(); // Produto atualizado com sucesso
         }
 
-        [HttpDelete("Delete Product")]
+        [HttpDelete("delete-product")]
         public async Task<ActionResult<ProductDTO>> Detele(int id)
         {
             var product = await _productService.GetProductById(id);
@@ -91,7 +92,7 @@ namespace HelpStockApp.API.Controllers
             return Ok(product);
         }
 
-        [HttpGet("Low-Stock")]
+        [HttpGet("low-stock")]
         public async Task<ActionResult<IEnumerable<Product>>> GetLowStock([FromQuery] int threshold)
         {
             if (threshold <= 0)
@@ -116,7 +117,7 @@ namespace HelpStockApp.API.Controllers
 
         }
 
-        [HttpPut("Bulk-Update Products")]
+        [HttpPut("bulkUpdate-products")]
         public async Task<IActionResult> BulkUpdate([FromBody] List<Product> products)
         {
             var productsToUpdate = new List<Product>();
@@ -137,14 +138,33 @@ namespace HelpStockApp.API.Controllers
             return Ok();
         }
 
-        [HttpPost("Compare Products")]
+        [HttpPost("compare-products")]
         public async Task<ActionResult<IEnumerable<Product>>> CompareProducts([FromBody] List<int> productIds)
         {
             var products = await _productService.GetProductByIds(productIds);
             return Ok(products);
         }
 
+        [HttpGet("dashboard-stock")]
+        public async Task<ActionResult<Product>> GetDashboardStockData()
+        {
+            var dashboardData = new DashboardStockDTO
+            {
+              
+                TotalProducts = await _productService.Products.CountAsync(),
+                TotalStockValue = await _productService.Products.SumAsync(p => p.Stock * p.Price),
+                LowStockProducts = await _productService.Products
+                    .Where(p => p.Stock < 10)
+                    .Select(p => new ProductStockDTO
+                    {
+                        ProductName = p.Name,
+                        Stock = p.Stock
+                    })
+                    .ToListAsync()
+            };
 
+            return Ok(dashboardData);
+        }
 
     }
 }
