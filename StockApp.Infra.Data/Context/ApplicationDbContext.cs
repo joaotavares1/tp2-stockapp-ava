@@ -10,9 +10,11 @@ namespace StockApp.Infra.Data.Context
 {
     public class ApplicationDbContext : DbContext
     {
-        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) 
+        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)
-        { }
+        {
+
+        }
         //sqlservericoma.database.windows.net
         public DbSet<Category> Categories { get; set; }
         public DbSet<Product> Products { get; set; }
@@ -22,5 +24,6 @@ namespace StockApp.Infra.Data.Context
             base.OnModelCreating(builder);
             builder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly);
         }
+
     }
 }
