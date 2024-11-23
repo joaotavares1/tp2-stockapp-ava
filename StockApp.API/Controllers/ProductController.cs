@@ -47,7 +47,7 @@ namespace HelpStockApp.API.Controllers
         }
 
         // Endpoint para criar um novo produto
-        [HttpPost("Create")]
+        [HttpPost("Create Product")]
         public async Task<ActionResult> CreateProduct([FromBody] ProductDTO productDto)
         {
             if (!ModelState.IsValid)
@@ -57,7 +57,7 @@ namespace HelpStockApp.API.Controllers
             return CreatedAtAction(nameof(Get), new { id = product.Id }, productDto);
         }
 
-        [HttpPut("Update")]
+        [HttpPut("Update Product")]
         public async Task<ActionResult> UpdateProduct(int id, [FromBody] ProductDTO productDto)
         {
             if (id != productDto.Id)
@@ -77,7 +77,21 @@ namespace HelpStockApp.API.Controllers
             return Ok(); // Produto atualizado com sucesso
         }
 
-        [HttpGet("low-stock")]
+        [HttpDelete("Delete Product")]
+        public async Task<ActionResult<ProductDTO>> Detele(int id)
+        {
+            var product = await _productService.GetProductById(id);
+            if (product == null)
+            {
+                return NotFound("Product not found");
+            }
+
+            await _productService.Remove(id);
+
+            return Ok(product);
+        }
+
+        [HttpGet("Low-Stock")]
         public async Task<ActionResult<IEnumerable<Product>>> GetLowStock([FromQuery] int threshold)
         {
             if (threshold <= 0)
@@ -102,7 +116,7 @@ namespace HelpStockApp.API.Controllers
 
         }
 
-        [HttpPut("bulk-update")]
+        [HttpPut("Bulk-Update Products")]
         public async Task<IActionResult> BulkUpdate([FromBody] List<Product> products)
         {
             var productsToUpdate = new List<Product>();
@@ -123,7 +137,14 @@ namespace HelpStockApp.API.Controllers
             return Ok();
         }
 
-      
+        [HttpPost("Compare Products")]
+        public async Task<ActionResult<IEnumerable<Product>>> CompareProducts([FromBody] List<int> productIds)
+        {
+            var products = await _productService.GetProductByIds(productIds);
+            return Ok(products);
+        }
+
+
 
     }
 }
