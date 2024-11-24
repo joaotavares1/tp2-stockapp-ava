@@ -53,8 +53,33 @@ namespace StockApp.Infra.Data.Repositories
 
         public async Task BulkUpdateAsync(List<Product> products)
         {
-            _productContext.Products.UpdateRange(products);
+            var productIds = products.Select(p => p.Id).ToList();
+
+            // Buscar os produtos existentes no banco
+            var existingProducts = await _productContext.Products
+                .Where(p => productIds.Contains(p.Id))
+                .ToListAsync();
+
+            foreach (var product in products)
+            {
+                // Localizar o produto existente no banco
+                var existingProduct = existingProducts.FirstOrDefault(p => p.Id == product.Id);
+
+                if (existingProduct != null)
+                {
+                    // Atualizar os valores do produto existente
+                    _productContext.Entry(existingProduct).CurrentValues.SetValues(product);
+                }
+                else
+                {
+                    // Opcional: Adicionar o produto caso ele não exista
+                    _productContext.Products.Add(product);
+                }
+            }
+
+            // Salvar as mudanças no banco
             await _productContext.SaveChangesAsync();
+
         }
 
         public async Task<IEnumerable<Product>> GetProductByIds(List<int> productIds)
